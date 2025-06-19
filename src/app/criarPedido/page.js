@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import axios from "axios"
+import Link from "next/link";
 
 export default function Pedido() {
     const [abaAtiva, setAbaAtiva] = useState("tacos")
@@ -8,7 +9,14 @@ export default function Pedido() {
     const [bebidas, setBebidas] = useState([])
     const [acompanhamentos, setAcompanhamentos] = useState([])
 
-    const [pedido, setPedido] = useState({ tacos: {}, bebidas: {}, acompanhamentos: {} })
+    const [pedido, setPedido] = useState({
+        tacos: {},
+        bebidas: {},
+        acompanhamentos: {},
+    })
+
+    const [nomeCliente, setNomeCliente] = useState("")
+    const [statusMensagem, setStatusMensagem] = useState("")
 
     // 🔄 Carregar dados da API
     useEffect(() => {
@@ -40,7 +48,7 @@ export default function Pedido() {
         })
     }
 
-    // 🔍 Função para obter os dados da aba ativa
+    // 🔍 Obter itens da aba ativa
     const obterItens = () => {
         switch (abaAtiva) {
             case "tacos":
@@ -51,6 +59,48 @@ export default function Pedido() {
                 return acompanhamentos
             default:
                 return []
+        }
+    }
+
+    // 💰 Calcular valor total
+    const calcularTotal = () => {
+        const calcularCategoria = (categoria, dados) => {
+            return Object.entries(pedido[categoria] || {}).reduce((acc, [id, qtd]) => {
+                const item = dados.find((i) => i.id === id)
+                return acc + (item ? item.preco * qtd : 0)
+            }, 0)
+        }
+
+        const total =
+            calcularCategoria("tacos", tacos) +
+            calcularCategoria("bebidas", bebidas) +
+            calcularCategoria("acompanhamentos", acompanhamentos)
+
+        return total
+    }
+
+    // 🚀 Enviar pedido para backend
+    const finalizarPedido = async () => {
+        try {
+            const tacosIds = Object.keys(pedido.tacos)
+            const bebidasIds = Object.keys(pedido.bebidas)
+            const acompanhamentosIds = Object.keys(pedido.acompanhamentos)
+
+            const payload = {
+                nomeCliente,
+                tacosIds,
+                bebidasIds,
+                acompanhamentosIds,
+            }
+
+            await axios.post("http://localhost:8080/api/pedidos", payload)
+
+            setStatusMensagem("✅ Pedido realizado com sucesso!")
+            setPedido({ tacos: {}, bebidas: {}, acompanhamentos: {} })
+            setNomeCliente("")
+        } catch (error) {
+            console.error("Erro ao finalizar pedido:", error)
+            setStatusMensagem("❌ Erro ao finalizar pedido.")
         }
     }
 
@@ -89,9 +139,14 @@ export default function Pedido() {
     }
 
     return (
-        <main className="min-h-screen bg-gray-50">
+        <main className="min-h-screen bg-gray-50 flex flex-col">
+            <div className="p-6">
+                {/* 🔙 Botão de voltar */}
+                <Link href="/" className="inline-block mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    ⬅️ Voltar para Home
+                </Link>
             {/* 🔥 Header */}
-            <header className="bg-orange-500 text-white py-4 shadow-md">
+            <header className="bg-red-600 text-white py-4 shadow-md">
                 <div className="max-w-4xl mx-auto flex justify-around">
                     <button
                         className={`${
@@ -99,7 +154,7 @@ export default function Pedido() {
                         }`}
                         onClick={() => setAbaAtiva("tacos")}
                     >
-                        Tacos
+                        🌮 Tacos
                     </button>
                     <button
                         className={`${
@@ -107,7 +162,7 @@ export default function Pedido() {
                         }`}
                         onClick={() => setAbaAtiva("bebidas")}
                     >
-                        Bebidas
+                        🥤 Bebidas
                     </button>
                     <button
                         className={`${
@@ -115,19 +170,48 @@ export default function Pedido() {
                         }`}
                         onClick={() => setAbaAtiva("acompanhamentos")}
                     >
-                        Acompanhamentos
+                        🍟 Acompanhamentos
                     </button>
                 </div>
             </header>
 
             {/* 🗒️ Conteúdo */}
-            <section className="max-w-4xl mx-auto p-6">
-                <h2 className="text-2xl font-bold mb-4 capitalize">
-                    {abaAtiva}
-                </h2>
+            <section className="max-w-4xl mx-auto p-6 flex-1">
+                <h2 className="text-2xl font-bold mb-4 capitalize">{abaAtiva}</h2>
                 {renderizarItens()}
             </section>
+
+            {/* 🛒 Resumo do Carrinho */}
+            <footer className="bg-white shadow-md p-4">
+                <div className="max-w-4xl mx-auto">
+                    <div className="flex flex-col space-y-2">
+                        <input
+                            type="text"
+                            className="border rounded px-3 py-2"
+                            placeholder="Nome do Cliente"
+                            value={nomeCliente}
+                            onChange={(e) => setNomeCliente(e.target.value)}
+                        />
+
+                        <div className="flex justify-between">
+              <span className="font-semibold">
+                Total: R$ {calcularTotal().toFixed(2)}
+              </span>
+                            <button
+                                onClick={finalizarPedido}
+                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                            >
+                                Finalizar Pedido
+                            </button>
+                        </div>
+
+                        {statusMensagem && (
+                            <p className="text-center text-sm">{statusMensagem}</p>
+                        )}
+                    </div>
+                </div>
+            </footer>
+            </div>
         </main>
     )
 }
-
