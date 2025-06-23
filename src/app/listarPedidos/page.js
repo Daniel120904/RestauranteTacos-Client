@@ -14,7 +14,7 @@ export default function ListarPedidos() {
 
     useEffect(() => {
         axios.get("http://localhost:8080/api/pedidos").then((res) => {
-            const pedidosSemPagamento = res.data.filter((p) => p.pagamento === null)
+            const pedidosSemPagamento = res.data.filter((p) => p.tipoPagamento === null)
             setPedidos(pedidosSemPagamento)
         })
 

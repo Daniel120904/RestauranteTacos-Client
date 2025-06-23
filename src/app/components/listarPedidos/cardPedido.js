@@ -14,7 +14,7 @@ export default function CardPedido({
                 Cliente: {pedido.nomeCliente}
             </h2>
             <p className="text-gray-600">
-                Valor Total: <strong>R$ {pedido.valorTotal.toFixed(2)}</strong>
+                Valor Total: <strong>R$ {pedido.precoTotal.toFixed(2)}</strong>
             </p>
 
             <div>

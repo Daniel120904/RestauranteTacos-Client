@@ -80,11 +80,17 @@ export default function CriarPedido() {
 
     const finalizarPedido = async () => {
         try {
+            const expandirIds = (categoria) => {
+                return Object.entries(pedido[categoria] || {}).flatMap(
+                    ([id, quantidade]) => Array(quantidade).fill(id)
+                )
+            }
+
             const payload = {
                 nomeCliente,
-                tacosIds: Object.keys(pedido.tacos),
-                bebidasIds: Object.keys(pedido.bebidas),
-                acompanhamentosIds: Object.keys(pedido.acompanhamentos),
+                tacosIds: expandirIds("tacos"),
+                bebidasIds: expandirIds("bebidas"),
+                acompanhamentosIds: expandirIds("acompanhamentos"),
             }
 
             await axios.post("http://localhost:8080/api/pedidos", payload)
