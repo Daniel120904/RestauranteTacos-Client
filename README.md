@@ -19,10 +19,11 @@ Este é o projeto **frontend** do sistema de gerenciamento de pedidos do restaur
 
 ```
 /app
-  /components     → Componentes reutilizáveis (Header, Footer, ListaItens etc)
-  /criarPedido    → Componentes da tela de criação de pedido
-  /utils          → Botões, mensagens e funções auxiliares
-  /api            → (Se necessário, rotas API do Next.js)
+  /components       → Componentes reutilizáveis (Header, Footer, ListaItens etc)
+  /criarPedido      → Componentes da tela de criação de pedido
+  /listarPedidos    → Componentes da tela de pagamento
+  /utils            → Botões, mensagens e funções auxiliares
+  /page             → Pagina inicial
 ```
 
 ---
